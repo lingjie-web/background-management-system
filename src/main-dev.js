@@ -9,9 +9,14 @@ import { Message } from "element-ui";
 import './assets/font_1838581_jib3ul41fok/iconfont.css'
 import './assets/font_manus/iconfont.css'
 import ZkTable from 'vue-table-with-tree-grid'
+import echarts from 'echarts'
+import loadsh from 'lodash'
 
 Vue.use(ElementUI)
 Vue.component(ZkTable.name, ZkTable)
+Vue.prototype.$echarts=echarts
+
+Vue.prototype.$lodash=loadsh
 
 Vue.prototype.$http=axios
 axios.defaults.baseURL='http://119.23.53.78:8888/api/private/v1'
@@ -24,7 +29,15 @@ Vue.prototype.$message=Message
 
 Vue.config.productionTip = false
 
-
+Vue.filter('dateFil',function (par) {
+  const date = new Date(par);
+  const Y = date.getFullYear();
+  const M = (date.getMonth()+1+'').padStart(2,'0');
+  const D = (date.getDay()+'').padStart(2,'0');
+  const h = (date.getHours()+'').padStart(2,'0');
+  const m = (date.getMinutes()+'').padStart(2,'0');
+  return `${Y}-${M}-${D} ${h}:${m}`
+})
 
 new Vue({
   router,

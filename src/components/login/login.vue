@@ -31,7 +31,6 @@
 </template>
 
 <script>
-import request from "../../net/axios";
 export default {
   name:'login',
   data(){

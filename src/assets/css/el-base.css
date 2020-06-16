@@ -1,0 +1,20 @@
+.nav{
+  margin-bottom: 15px;
+}
+.submit{
+  float: right;
+}
+.input{
+  margin-right: 20px;
+  margin-bottom: 20px;
+}
+.table{
+  padding: 20px 20px;
+  background-color: #fff;
+}
+.el-tag,.input-new-tag{
+  margin:7px;
+}
+.el-breadcrumb{
+  margin-bottom: 20px;
+}

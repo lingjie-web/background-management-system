@@ -1,12 +1,27 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import login from '../components/login/login.vue'
-import home from '../components/home/home.vue'
-import user from '../components/home/homeChild/user.vue'
-import roles from '../components/home/homeChild/roles.vue'
-import rights from '../components/home/homeChild/rights.vue'
-import shopList from '../components/home/homeChild/shopManage/shopList.vue'
-import params from '../components/home/homeChild/shopManage/params.vue'
+// import login from '../components/login/login.vue'
+const login=()=>import(/*webpackChunkName:'group-a'*/ '../components/login/login.vue')
+ 
+const home=()=>import(/*webpackChunkName:'group-b'*/ '../components/home/home.vue')
+ 
+const user=()=>import(/*webpackChunkName:'group-c'*/ '../components/home/homeChild/user.vue')
+
+const roles=()=>import(/*webpackChunkName:'group-c'*/ '../components/home/homeChild/roles.vue')
+
+const rights=()=>import(/*webpackChunkName:'group-c'*/ '../components/home/homeChild/rights.vue')
+
+const shopCategories=()=>import(/*webpackChunkName:'group-d'*/ '../components/home/homeChild/shopManage/shopCategories.vue')
+
+const params=()=>import(/*webpackChunkName:'group-d'*/ '../components/home/homeChild/shopManage/params.vue')
+
+const shopList=()=>import(/*webpackChunkName:'group-d'*/ '../components/home/homeChild/shopManage/shopList.vue')
+
+const addShop=()=>import(/*webpackChunkName:'group-e'*/ '../components/home/homeChild/shopManage/addShop.vue')
+
+const orders=()=>import(/*webpackChunkName:'group-f'*/ '../components/home/homeChild/ordersManage/orders.vue')
+
+const reports=()=>import(/*webpackChunkName:'group-g'*/ '../components/home/homeChild/reportsManager/reports.vue')
 
 Vue.use(VueRouter)
 
@@ -33,11 +48,23 @@ Vue.use(VueRouter)
         path:'/rights',
         component:rights
       },{
-        path:'/goods',
-        component:shopList
+        path:'/categories',
+        component:shopCategories
       },{
         path:'/params',
         component:params
+      },{
+        path:'/goods',
+        component:shopList
+      },{
+        path:'/addShop',
+        component:addShop
+      },{
+        path:'/orders',
+        component:orders
+      },{
+        path:'/reports',
+        component:reports
       }
     ]
   }

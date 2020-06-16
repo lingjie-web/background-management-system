@@ -6,181 +6,102 @@
       <el-breadcrumb-item>商品列表</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card >
-      <el-button type="primary" class="submit" @click="showAdddig">添加商品</el-button>
-      <ZkTable class="ZkTable"
-        ref="table" 
-        index-text="#"
-        border :selection-type='false' show-index   :expand-type=false
-        :data="goodsList"
-        :columns="columns">
-          <template slot='deleted' slot-scope="scope">
-            <i class="el-icon-success" style="color:lightgreen" v-if="!scope.row.cat_deleted"></i>
-            <i class="el-icon-error" style="color:red" v-else></i>
-          </template>
-           <template slot='level' slot-scope="scope">
-             <el-tag type='danger' v-if="scope.row.cat_level===0">一级</el-tag>
-             <el-tag type='warning' v-else-if="scope.row.cat_level===1">二级</el-tag>
-             <el-tag v-else-if="scope.row.cat_level===2">三级</el-tag>
-           </template>
-           <template slot="active">
-              <el-button type="primary" icon="el-icon-edit" size='small'>编辑</el-button>
-              <el-button type="danger" icon="el-icon-delete" size='small'>删除</el-button>
-           </template>
-      </ZkTable>
-      <el-pagination
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-            :current-page='params.pagenum'
-            :page-sizes="[4,6, 8, 10, 12]"
-            :page-size="4"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="total">
-      </el-pagination>
-    <!-- 添加分类 -->
-    <el-dialog  title="添加分类" :visible.sync="showAddGoods" width="50%" >
-      <el-form label-width="100px" :model="addGoodForm" ref="casc" :rules='rules'>
-        <el-form-item label="商品名称" prop='name'>
-          <el-input v-model="addGoodForm.cat_name" ></el-input>
-        </el-form-item>
-        <el-form-item label="父级分类">
-          <el-cascader
-            v-model="selcetPid" 
-            :options="addGoodList" @change='selectChange'
-            :props="props">
-          </el-cascader>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="showAddGoods = false">取 消</el-button>
-        <el-button type="primary" @click="submitGoodForm" >确 定</el-button>
-      </span>
-    </el-dialog>
+      <el-input
+        class="input"
+        placeholder="请输入内容"
+        v-model="shop.query">
+      </el-input>
+      <el-button type="primary" icon="el-icon-search" @click="search"></el-button>
+      <el-button type="primary"  @click="addShop" class="addBtn">添加商品</el-button>
+       <el-table
+          border stripe
+          :data="shopList.goods"
+          style="width: 100%">
+          <el-table-column type=index>
+          </el-table-column>
+          <el-table-column prop="goods_name" label="商品名" width="180"></el-table-column>
+          <el-table-column prop="goods_price" label="商品价格" width="180"></el-table-column>
+          <el-table-column prop="goods_weight" label="商品重量" width="180"></el-table-column>
+          <el-table-column label="创建时间" width="180">
+            <template slot-scope="scope">
+               {{scope.row.add_time|dateFil}}
+            </template>
+          </el-table-column>
+          <el-table-column  label="操作" width="180">
+            <template slot-scope="scope">
+              <el-tooltip class="item" effect="dark" content="编辑" placement="top" >
+                <el-button type="primary" icon="el-icon-edit" @click="editShop(scope.row.id)"></el-button>
+              </el-tooltip>
+              <el-tooltip class="item" effect="dark" content="删除"  placement="top">
+                <el-button type="danger" icon="el-icon-delete" @click="deleteShop(scope.row.id)" ></el-button>
+              </el-tooltip>
+            </template>
+          </el-table-column>
+       </el-table>
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="shop.pagenum"
+          :page-sizes="[6,8,10,12]"
+          :page-size="shop.pagesize"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="shopList.total">
+        </el-pagination>
     </el-card>
   </div>
 </template>
 
 <script>
-import ZkTable from 'vue-table-with-tree-grid'
-export default {
-  name:'shopList',
-  data(){return{
-      rules:{
-        name:[{required: true, message: '请输入商品名称', trigger: 'blur'}
-          ],
-      },
-      params:{ type:[3],pagenum:1,pagesize:4},
-      total:0,
-      goodsList:[],
-      addGoodList:[],
-      columns:[
-          { label:'分类名称',
-            prop:'cat_name'
-          },
-          { label:'是否有效',
-          type: 'template',
-          template: 'deleted',
-          },
-          {label:'排序',
-          type:'template',
-          template:'level'
-          },
-          {label:'操作',
-          type:'template',
-          template:'active',
-          minWidth:'200px'
-          }
-      ],
-      showAddGoods:false,
-      props:{
-        expandTrigger:'hover',
-        label:'cat_name',
-        value:'cat_id',
-        checkStrictly:true
-      },
-      selcetPid:null,
-      addGoodForm:{
-        cat_name:'',
-        cat_pid:0,
-        cat_level:0
-      }
-      
+export default {  
+  data(){
+    return{
+      shop:{
+        query:'',
+        pagenum:1,
+        pagesize:8,
+        },
+      shopList:[]
     }
   },
-  components:{
-    ZkTable
-  },
   methods:{
-    async getGoods(){
-      const {data:res}=await this.$http.get('categories',{params:this.params})
+    async getShopList(){
+      const{data:res}=await this.$http.get('goods',{params:this.shop})
       console.log(res);
-      if(res.meta.status===200){
-        this.goodsList=res.data.result
-        this.total=res.data.total
-        console.log(this.goodsList);
-      }else{
-        this.$message.error('请求商品数据失败')
-      }
+      if(res.meta.status===200)this.shopList=res.data
     },
-    handleCurrentChange(val){
-      this.params.pagenum=val,
-      this.getGoods()
+    search(){
+        this.getShopList().then(()=>{this.shop.query=''})
     },
-    handleSizeChange(val){
-      this.params.pagesize=val,
-      this.getGoods()
+    editShop(){
+      console.log('edit');
     },
-    showAdddig(){
-      this.showAddGoods=true,
-      this.$http.get('categories',{params:{type:[2]}}).then(res=>{
-        
-        if(res.data.meta.status===200){
-          this.addGoodList=res.data.data
-        }
-        console.log(this.addGoodList);
-      })
+    deleteShop(){
+      console.log('delete');
     },
-     submitGoodForm(){
-      this.$refs.casc.validate(async valid=>{if(vaild){
-        const{data:res}=await this.$http.post('categories',this.addGoodForm)
-        console.log(res);
-        if(res.meta.status===201){
-          this.$message.success('添加成功'),
-          this.showAddGoods = false,
-          this.getGoods()
-          this.$refs.casc.resetField()
-        }else{
-          this.$message.error('添加失败')
-        }
-      }
-      }
-      )
+    handleSizeChange(res){
+      this.shop.pagesize=res
+      this.getShopList()
     },
-    selectChange(){
-      if(this.selcetPid.length===0){
-        this.addGoodForm.cat_level=0
-      }else if(this.selcetPid.length===1){
-        this.addGoodForm.cat_pid=this.selcetPid[0]
-        this.addGoodForm.cat_level=1
-      }else{
-        this.addGoodForm.cat_level=2
-        this.addGoodForm.cat_pid=this.selcetPid[1]
-      }
+    handleCurrentChange(res){
+      this.shop.pagenum=res
+      this.getShopList()
+    },
+    addShop(){
+      this.$router.push('/addShop')
     }
   },
   created(){
-    this.getGoods()
+    this.getShopList()
   }
 }
 </script>
 
-<style lang="less" scoped>
-.ZkTable {
-  margin-top: 20px;
-}
-.el-breadcrumb{
-  margin-bottom: 20px;
-}
-.el-pagination{
-  margin-top: 20px;
-}
+<style scoped>
+  .el-input{
+    width:40%;
+    padding-right: 20px;
+  }
+  .addBtn{
+    float: right;
+  }
 </style>

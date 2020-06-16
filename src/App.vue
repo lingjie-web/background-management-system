@@ -6,4 +6,5 @@
 
 <style>
   @import './assets/css/normalize.css';
+  @import './assets//css/el-base.css';
 </style>
